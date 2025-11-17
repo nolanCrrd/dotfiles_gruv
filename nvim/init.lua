@@ -1,9 +1,10 @@
--- [basics] --
-vim.cmd.colorscheme("retrobox")
-vim.api.nvim_set_hl(0, "Normal", { bg = none })
-vim.api.nvim_set_hl(0, "NormalNC", { bg = none })
-vim.api.nvim_set_hl(0, "EndOfBuffer", { bg = none })
+require("config.lazy")
+require("keymaps")
 
+vim.api.nvim_set_hl(0, "SnacksPickerDir", { link = "Text" })
+vim.api.nvim_set_hl(0, "SnacksPickerPathHidden", { link = "Text" })
+vim.api.nvim_set_hl(0, "SnacksPickerGitStatusUntracked", { link = "Special" })
+-- [basics] --
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.cursorline = true
@@ -12,10 +13,17 @@ vim.opt.scrolloff = 15
 vim.opt.sidescrolloff = 10
 
 -- [Indentation] --
+vim.opt.list = true
+vim.opt.listchars = {
+  tab = "▸ ",        -- tab affiché comme ▸ + espace
+  trail = "·",       -- espace en fin de ligne
+  extends = "…",     -- ligne trop longue à droite
+  precedes = "…",    -- ligne trop longue à gauche
+}
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
-vim.opt.softtabstop = 4
-vim.opt.expandtab = true
+vim.opt.softtabstop = 0
+vim.opt.expandtab = false
 vim.opt.smartindent = true
 vim.opt.autoindent = true
 
@@ -67,51 +75,7 @@ vim.opt.encoding = "UTF-8"
 
 -- [ KEYMAPS ] --
 
-vim.g.mapleader = " "
-vim.g.maplocalleader = " "
-
-local map = vim.keymap.set
 -- buffer
-map("n", "<leader>bn", ":bnext<CR>", { desc = "Next buffer" })
-map("n", "<leader>bp", ":bprevious<CR>", { desc = "Next buffer" })
-
--- navigation
-map("n", "<leader>sv", ":vsplit<CR>", { desc = "Split vertically" })
-map("n", "<leader>sh", ":split<CR>", { desc = "Split horizontally" })
-map("n", "<C-Up>", ":resize +2<CR>", { desc = "Increase split height" })
-map("n", "<C-Down>", ":resize -2<CR>", { desc = "Decrease split height" })
-map("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase split width" })
-map("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease split width" })
-map("n", "<C-h>", "<C-w>h", { desc = "Focus left screen" })
-map("n", "<C-j>", "<C-w>j", { desc = "Focus up screen" })
-map("n", "<C-k>", "<C-w>k", { desc = "Focus down screen" })
-map("n", "<C-l>", "<C-w>l", { desc = "Focus left screen" })
-
--- line edition
-map("n", "<A-j>", ":m .+1<CR>==", { desc = "Move line up" })
-map("n", "<A-k>", ":m .-2<CR>==", { desc = "Move line down" })
-map("v", "<A-j>", ":m '>+1<CR>gv=gv", { desc = "Move selection up" })
-map("v", "<A-k>", ":m '<-2<CR>gv=gv", { desc = "Move selection down" })
-
--- better indenting
-map("v", "<", "<gv", { desc = "Indent selection left and reselect" })
-map("v", ">", ">gv", { desc = "Indent selection right and reselect" })
-
--- File navigation
-map("n", "<leader>e", ":Explore<CR>", { desc = "Open file explorer" })
-map("n", "<leader>ff", ":find ", { desc = "Find file" })
-
--- quick config file
-map("n", "<leader>rc", ":e ~/.config/nvim/init.lua<CR>", { desc = "Open nvim init.lua" })
-
--- tab
-vim.keymap.set('n', '<leader>tn', ':tabnew<CR>', { desc = 'New tab' })
-vim.keymap.set('n', '<leader>tx', ':tabclose<CR>', { desc = 'Close tab' })
-
--- Tab moving
-vim.keymap.set('n', '<leader>tm', ':tabmove<CR>', { desc = 'Move tab' })
-vim.keymap.set('n', '<leader>t>', ':tabmove +1<CR>', { desc = 'Move tab right' })
-vim.keymap.set('n', '<leader>t<', ':tabmove -1<CR>', { desc = 'Move tab left' })
 
 -- Function to open file in new tab
 local function open_file_in_tab()
@@ -123,6 +87,15 @@ local function open_file_in_tab()
 end
 
 vim.keymap.set('n', '<leader>to', open_file_in_tab, { desc = 'Open file in new tab' })
+
+-- Force les numéros même après changement de buffer
+vim.api.nvim_create_autocmd({'BufEnter', 'BufWinEnter'}, {
+    pattern = '*',
+    callback = function()
+        vim.opt.number = true
+        vim.opt.relativenumber = true
+    end
+})
 
 -- Copy Full File-Path
 vim.keymap.set("n", "<leader>pa", function()
